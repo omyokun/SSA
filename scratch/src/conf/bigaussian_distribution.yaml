@@ -1,0 +1,4 @@
+training:
+  data: bigaussian
+  data_kwargs: {bias1: 0.0, bias2: 0.0, scale1: 1.0, scale2: 1.0}
+

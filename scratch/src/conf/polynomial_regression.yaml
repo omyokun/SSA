@@ -1,0 +1,31 @@
+inherit: 
+    - base.yaml
+    - models/standard.yaml
+    - bigaussian_distribution.yaml
+model:
+    n_positions: 256
+training:
+    task: polynomial_regression
+    curriculum:
+        points:
+            start: 11
+            end: 41
+            inc: 2
+            interval: 2000
+        polynomial_degree: 
+            start: 1
+            end: 1
+            inc: 1
+            interval: 50000
+        dims:
+            start: 1
+            end: 1
+            inc: 1
+            interval: 2000
+    data: bigaussian
+    data_kwargs: {bias1: 0.0, bias2: 0.0, scale1: 1.0, scale2: 1.0}
+    task_kwargs: {distribution: "bigaussian", bias1: 0.0, bias2: 0.0, scale1: 1.0, scale2: 1.0} 
+out_dir: models/polynomial_regression
+
+wandb:
+    name: "1d_SSALFwithAW_12l_8ah_deg_1NFullTransformer"

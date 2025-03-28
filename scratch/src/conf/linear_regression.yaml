@@ -1,0 +1,16 @@
+inherit: 
+    - base.yaml
+    - models/tiny.yaml
+training:
+    task: polynomial_regression
+    curriculum:
+        points:
+            start: 11
+            end: 41
+            inc: 2
+            interval: 2000
+
+out_dir: models/polynomial_regression
+
+wandb:
+    name: "polynomial_regression_tiny_20D"

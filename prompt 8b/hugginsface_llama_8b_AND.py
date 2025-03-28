@@ -1,0 +1,149 @@
+import os
+import warnings
+import transformers
+import torch
+import logging
+import time
+#import bitsandbytes as bnb -- not needed but activate for quantisation on a less powerful GPU 
+from transformers import BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from transformers import LlamaConfig, LlamaForCausalLM, LlamaTokenizer
+import random
+import numpy as np
+import json
+
+from tqdm import tqdm
+
+seed = 42
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(seed)
+
+model_id = "/tmpdir/naim/llama3.1.8b/Llama-3.1-8B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
+    
+# Add padding token configuration
+tokenizer.pad_token = tokenizer.eos_token
+tokenizer.padding_side = "right"  # Optional but recommended for most cases
+
+SYSTEM_PROMPT = '''
+    You are an auto-regressive AI model designed to evaluate whether each sublist of a list of numbers is entirely positive. 
+    Your task is to process the list incrementally, verifying the positivity of each sublist one by one. 
+    A sublist is considered "TRUE" if all its elements are greater than zero. 
+    Once a sublist contains a non-positive number, all subsequent sublists will be marked as "FALSE". 
+    Although you process the list step-by-step, you will only output the final list of booleans once all sublists have been evaluated.
+
+    Here are some examples to illustrate the task:
+
+    Example 1:
+    CONTEXT: [1, 1, 2, 3, -1, 2, 1]
+    #Answer: 
+    [True, True, True, True, False, False, False]
+
+    Example 2:
+    CONTEXT: [0.1, -9, -0.11, 5, 0, 3.5]
+    #Answer: 
+    [True, False, False, False, False, False]
+
+    Example 3:
+    CONTEXT: [-1, -2, -3, -4, -5]
+    #Answer: 
+    [False, False, False, False, False]
+
+    Example 4:
+    CONTEXT: [0.5, 1.5, -0.5, 2.5, -2.5]
+    #Answer: 
+    [True, True, False, False, False]
+
+    Example 5:
+    CONTEXT: [10, -10, 0, 0.01, -0.01]
+    #Answer: 
+    [True, False, False, False, False]
+
+    Now, given a new list of numbers, perform the same task and provide the final output in the specified format.
+    DO NOT include any other text in your response.
+    DO NOT use any PYTHON code in your response, GIVE JUST THE OUTPUT LIST AS THE ANSWER.
+    '''
+
+model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype=torch.bfloat16,
+        device_map="auto",
+        trust_remote_code=True,
+        use_cache=True,
+    )
+
+print("Model and Tokenizer loaded!!")
+
+def generate_llama_output(input_instruction):
+    messages = [
+        {
+            'role':'system',
+            'content':SYSTEM_PROMPT
+        },
+        {
+            'role':'user',
+            'content':input_instruction.strip()
+        }
+    ]
+    
+    input_ids = tokenizer.apply_chat_template(messages,add_generation_prompt=True,return_tensors="pt").to(model.device)
+    
+    outputs = model.generate(
+        input_ids,
+        max_new_tokens=10000,
+        do_sample=True,
+        temperature=0.6,
+        top_p=0.9,
+    )
+
+    response = tokenizer.decode(outputs[0][input_ids.shape[-1]:], skip_special_tokens=True)
+    #response_lines = [line.strip() for line in response.split('\n') if line.strip().startswith('place(')]
+
+    return response
+
+def gen_test_data(sigma=30,length=200,seed=42):
+    # Set seeds for reproducibility
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    nums = [round(num, 2) for num in np.random.normal(loc=0, scale=sigma, size=length)]
+    return nums
+
+def run_inference(output_file_path=""):
+    predictions = {}
+    total_lengths = len(range(10, 151, 10))
+    total_sigmas = len(range(1, 30, 1))
+    total_iterations = total_lengths * total_sigmas
+    key = 1
+    for length in tqdm(range(10, 151, 10), desc="Lengths", total=total_lengths):
+        #print("length", length)
+        for sigma in tqdm(range(1,30,1), desc="Sigmas", total=total_sigmas):
+            #print("sigma",sigma)
+            try:
+                seed = 32*length+sigma*7 + 2
+                nums = gen_test_data(sigma=sigma,length=length,seed=seed)
+                #print("nums",nums)
+                user_prompt = f"CONTEXT: {nums}"
+                output = generate_llama_output(user_prompt)
+                #print("output",output)
+                predictions[key] = {
+                    'nums':nums,
+                    'output':output
+                }
+            except Exception as e:
+                #print("exception", e)
+                predictions[key] = {
+                    'nums':nums,
+                    'output':"[]"
+                }
+            #break
+            key += 1
+        #break
+    with open(output_file_path,'w') as f:
+        json.dump(predictions,f,indent=4)
+
+if __name__ == "__main__":
+    run_inference(output_file_path="/tmpdir/naim/finetuning/data/output/outputs_8b_prompt10_151_rerun.json")
+

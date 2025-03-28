@@ -21,7 +21,7 @@ torch.manual_seed(seed)
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
 
-model_id = "/tmpdir/naim/llama3.1.8b/Llama-3.1-8B-Instruct"
+model_id = "/tmpdir/user_name/llama3.1.8b/Llama-3.1-8B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
     
 # Add padding token configuration
@@ -147,5 +147,5 @@ def run_inference(output_file_path=""):
         json.dump(predictions,f,indent=4)
 
 if __name__ == "__main__":
-    run_inference(output_file_path="/tmpdir/naim/finetuning/data/output/outputs_8b_OR_prompt101_151.json")
+    run_inference(output_file_path="/tmpdir/user_name/finetuning/data/output/outputs_8b_OR_prompt101_151.json")
 

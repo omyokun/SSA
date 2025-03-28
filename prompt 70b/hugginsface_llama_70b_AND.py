@@ -4,7 +4,6 @@ import transformers
 import torch
 import logging
 import time
-#import bitsandbytes as bnb -- not needed but activate for quantisation on a less powerful GPU 
 from transformers import BitsAndBytesConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from transformers import LlamaConfig, LlamaForCausalLM, LlamaTokenizer
@@ -107,9 +106,7 @@ def generate_llama_output(input_instruction):
     )
 
     response = tokenizer.decode(outputs[0][input_ids.shape[-1]:], skip_special_tokens=True)
-    #response_lines = [line.strip() for line in response.split('\n') if line.strip().startswith('place(')]
-
-    #return '\n'.join(response_lines)
+    
     return response
 
 def gen_test_data(sigma=30,length=200,seed=42):
@@ -126,29 +123,22 @@ def run_inference(output_file_path=""):
     total_iterations = total_lengths * total_sigmas
     key = 1
     for length in tqdm(range(1,151,10), desc="Lengths", total=total_lengths):
-        #print("length", length)
         for sigma in tqdm(range(1,30,1), desc="Sigmas", total=total_sigmas):
-            #print("sigma",sigma)
             try:
                 seed = 19*length+sigma*32 + 43
                 nums = gen_test_data(sigma=sigma,length=length,seed=seed)
-                #print("nums",nums)
                 user_prompt = f"CONTEXT: {nums}"
                 output = generate_llama_output(user_prompt)
-                #print("output",output)
                 predictions[key] = {
                     'nums':nums,
                     'output':output
                 }
             except Exception as e:
-                #print("exception", e)
                 predictions[key] = {
                     'nums':nums,
                     'output':"[]"
                 }
-            #break
             key += 1
-        #break
     with open(output_file_path,'w') as f:
         json.dump(predictions,f,indent=4)
 

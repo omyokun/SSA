@@ -43,14 +43,12 @@ def load_finetuned_model():
     print("Fine tuned Model and tokenizer Loaded Locally !!")
 
     print("We are trying to get outputs for the following data: ")
-    #nums = [1,2,-1,3,4]
     key = 1
     outputs = {}
     # Calculate total iterations for the outer progress bar
     total_lengths = len(range(10, 151, 10))
     total_sigmas = len(range(1, 30, 1))
     total_iterations = total_lengths * total_sigmas
-    #with tqdm(total=total_iterations, desc="Overall Progress") as pbar:
     for length in tqdm(range(10,151,10), desc="Lengths", total=total_lengths):
         for sigma in tqdm(range(1,30,1), desc="Sigmas", total=total_sigmas):
             seed = 33*length+sigma*32 + 10

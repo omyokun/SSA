@@ -21,10 +21,8 @@ os.environ["WANDB_DISABLED"] = "True"
 # QLoRA parameters
 # LoRA attention dimension
 
-#input_data_path = "/tmpdir/user_name/finetuning/linear_functions/input/train_LF.json"
 input_data_csv = "/tmpdir/user_name/finetuning/data/OR_data_41_rounded.csv"
-#input_data_csv = "/tmpdir/user_name/finetuning/linear_functions/input/linear_functions_data_10_1-4.csv"
-#input_data_csv = "/tmpdir/user_name/finetuning/linear_functions/input/linear_functions_data_10_3.csv"
+
 
 lora_r = 64
 lora_alpha = 16
@@ -33,8 +31,6 @@ use_4bit = True
 bnb_4bit_compute_dtype = "float16"
 bnb_4bit_quant_type = "nf4"
 use_nested_quant = False
-#output_dir = "/tmpdir/user_name/finetuning/model/results_3_epoch_dummy_LF_10_3"
-#output_dir = "/tmpdir/user_name/finetuning/model/results_3_epoch_dummy_AND"
 output_dir = "/tmpdir/user_name/finetuning/model/results_2_epoch_dummy_OR"
 num_train_epochs = 2
 fp16 = False
@@ -77,15 +73,7 @@ def formatting_prompts_func(example):
         <|start_header_id|>assistant<|end_header_id|>#Answer: 
         {example["output"][i]}
         '''
-        # text  = f'''
-        # <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-        # You are an AI assistant that will generate an output for an input-output pairs sequence of type (x1,f(x1),...,xn) and you role is to find the value f(xn).        <|eot_id|>
-        # <|start_header_id|>user<|end_header_id|>
-        # CONTEXT: {example["input"][i]}
-        # <|eot_id|>
-        # <|start_header_id|>assistant<|end_header_id|>#Answer: 
-        # {example["output"][i]}
-        # '''
+        
         formatted_dict['text'].append(text)
 
     return formatted_dict
@@ -132,16 +120,11 @@ def convert_to_pandas(json_path):
     return df
 
 def main():
-    #train_dataset,test_dataset,dev_dataset = return_datasets()
     model_name = "/tmpdir/user_name/llama3.1.8b/Llama-3.1-8B-Instruct"
     # Fine-tuned model name
-    #new_model = "Llama-3-8B-SNLI"
-    #new_model = "Llama-3-8B-AND-3-epoch"
-    #new_model = "Llama-31-8B-LF-3-epoch"
+    
     new_model = "Llama-31-8B-OR-2-epoch"
 
-    #train_dataset = return_datasets()
-    #json2pandas = convert_to_pandas(input_data_path)
     dataset = Dataset.from_pandas(pd.read_csv(input_data_csv))
     print("Dataset Loaded")
     formatted_dataset = dataset.map(
@@ -150,7 +133,6 @@ def main():
         remove_columns=dataset.column_names
     )
     print("Datasets generated !!")
-    #response_template = " ### Answer:"
     response_template = "#Answer:"
 
     compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
@@ -219,8 +201,7 @@ def main():
         packing=packing,
         report_to=None
     )
-    #    report_to=None
-    #)
+    
     collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
     #print("All good until here !!")

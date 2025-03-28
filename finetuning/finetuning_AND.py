@@ -167,7 +167,6 @@ def main():
             print("=" * 80)
     
     print("Loading Model and Tokenizer ")
-    #model = AutoModelForCausalLM.from_pretrained("/tmpdir/bhar/llama3-8B-Instruct-hf")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         quantization_config=bnb_config,
@@ -231,15 +230,7 @@ def main():
         args=training_arguments,
         
     )
-    """
-    trainer = SFTTrainer(
-        model,
-        train_dataset=train_dataset,
-        args=SFTConfig(output_dir="/tmpdir/bhar/codes/snli_training/tmp"),
-        formatting_func=formatting_prompts_func,
-        data_collator=collator,
-    )
-    """
+    
     print("Trainer Loaded !!")
     print("Starting Training !!")
     trainer.train()

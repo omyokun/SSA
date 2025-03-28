@@ -24,7 +24,6 @@ print("device : ", device)
 n_layer = 12
 n_ah = 8
 n_deg= 1
-#model = "2LMLP"
 n_embed = 256
 task = "polynomial_regression"
 

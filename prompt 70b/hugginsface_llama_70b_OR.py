@@ -4,7 +4,6 @@ import transformers
 import torch
 import logging
 import time
-#import bitsandbytes as bnb -- not needed but activate for quantisation on a less powerful GPU 
 from transformers import BitsAndBytesConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from transformers import LlamaConfig, LlamaForCausalLM, LlamaTokenizer
@@ -106,9 +105,7 @@ def generate_llama_output(input_instruction):
     )
 
     response = tokenizer.decode(outputs[0][input_ids.shape[-1]:], skip_special_tokens=True)
-    #response_lines = [line.strip() for line in response.split('\n') if line.strip().startswith('place(')]
-
-    #return '\n'.join(response_lines)
+    
     return response
 
 def gen_test_data(sigma=30,length=200,seed=42):
@@ -134,10 +131,8 @@ def run_inference(output_file_path=""):
             try:
                 seed = 33*length+sigma*8 + 8
                 nums = gen_test_data(sigma=sigma,length=length,seed=seed)
-                #print("nums",nums)
                 user_prompt = f"CONTEXT: {nums}"
                 output = generate_llama_output(user_prompt)
-                #print("output",output)
                 predictions[key] = {
                     'nums':nums,
                     'output':output
@@ -148,9 +143,7 @@ def run_inference(output_file_path=""):
                     'nums':nums,
                     'output':"[]"
                 }
-            #break
             key += 1
-        #break
     with open(output_file_path,'w') as f:
         json.dump(predictions,f,indent=4)
 

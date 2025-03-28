@@ -21,10 +21,7 @@ os.environ["WANDB_DISABLED"] = "True"
 # QLoRA parameters
 # LoRA attention dimension
 
-#input_data_path = "/tmpdir/user_name/finetuning/data/linear_functions_data_smallest_2.json"
-#input_data_path = "/tmpdir/user_name/finetuning/linear_functions/input/train_LF.json"
-#input_data_csv = "/tmpdir/user_name/finetuning/data/linear_functions_data_smallest_41_rounded.csv"
-#input_data_csv = "/tmpdir/user_name/finetuning/linear_functions/input/linear_functions_data_10_1-4.csv"
+
 input_data_csv = "/tmpdir/user_name/finetuning/linear_functions/input/linear_functions_data_10_3.csv"
 
 lora_r = 64
@@ -66,15 +63,6 @@ def formatting_prompts_func(example):
     # Initialize the dictionary to store formatted texts
     formatted_dict = {'text': []}
     for i in range(len(example['input'])):
-        # text  = f'''
-        # <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-        # You are an AI assistant that will generate a boolean outputs from inputs, where the task is "AND" logic function, where positive values represent "TRUE" and negative ones represent "FALSE".        <|eot_id|>
-        # <|start_header_id|>user<|end_header_id|>
-        # CONTEXT: {example["input"][i]}
-        # <|eot_id|>
-        # <|start_header_id|>assistant<|end_header_id|>#Answer: 
-        # {example["output"][i]}
-        # '''
         text  = f'''
         <|begin_of_text|><|start_header_id|>system<|end_header_id|>
         You are an AI assistant that will generate an output for an input-output pairs sequence of type (x1,f(x1),...,xn) and you role is to find the value f(xn).        <|eot_id|>
@@ -133,12 +121,8 @@ def main():
     #train_dataset,test_dataset,dev_dataset = return_datasets()
     model_name = "/tmpdir/user_name/llama3.1.8b/Llama-3.1-8B-Instruct"
     # Fine-tuned model name
-    #new_model = "Llama-3-8B-SNLI"
-    #new_model = "Llama-3-8B-AND-3-epoch"
     new_model = "Llama-31-8B-LF-3-epoch"
 
-    #train_dataset = return_datasets()
-    #json2pandas = convert_to_pandas(input_data_path)
     dataset = Dataset.from_pandas(pd.read_csv(input_data_csv))
     print("Dataset Loaded")
     formatted_dataset = dataset.map(
@@ -147,7 +131,6 @@ def main():
         remove_columns=dataset.column_names
     )
     print("Datasets generated !!")
-    #response_template = " ### Answer:"
     response_template = "#Answer:"
 
     compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
@@ -216,8 +199,7 @@ def main():
         packing=packing,
         report_to=None
     )
-    #    report_to=None
-    #)
+    
     collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
     #print("All good until here !!")

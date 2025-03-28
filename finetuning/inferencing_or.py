@@ -58,7 +58,6 @@ def load_finetuned_model():
             seed = 100*length+sigma
             nums = gen_test_data(sigma=sigma,length=length,seed=seed)
             prompt = naive_prompt(nums)
-                #print(f"Prompt passed to the model: {prompt}")
             try:
                 model_inputs = tokenizer(prompt,return_tensors = "pt").to("cuda")
                 output = model.generate(**model_inputs , max_length = 10000, pad_token_id= tokenizer.eos_token_id,eos_token_id= tokenizer.eos_token_id)

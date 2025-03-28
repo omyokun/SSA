@@ -45,7 +45,6 @@ def load_finetuned_model():
     print("Fine tuned Model and tokenizer Loaded Locally !!")
 
     print("We are trying to get outputs for the following data: ")
-    #nums = [1,2,-1,3,4]
     key = 1
     outputs = {}
     # Calculate total iterations for the outer progress bar
@@ -54,7 +53,6 @@ def load_finetuned_model():
     total_lengths = len(range(10, nb_len, 10))
     total_sigmas = len(range(1, nb_sigma, 1))
     total_iterations = total_lengths * total_sigmas
-    #with tqdm(total=total_iterations, desc="Overall Progress") as pbar:
     for length in tqdm(range(10,nb_len,10), desc="Lengths", total=total_lengths):
         for sigma in tqdm(range(1,nb_sigma,1), desc="Sigmas", total=total_sigmas):
             seed = 100*length+sigma
@@ -70,10 +68,8 @@ def load_finetuned_model():
                     
             except Exception as e:
                 outputs[key] = "[]"
-                    #print(f"Error: {e}")
-                    #continue
+                    
             key += 1
-            #pbar.update(1)
     print("Dumping to Output file")
     with open("/tmpdir/user_name/finetuning/data/output/outputs_OR_finetuned_1_150.json", "w") as f:
         json.dump(outputs, f, indent=4)

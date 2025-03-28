@@ -53,16 +53,16 @@ def gen_test_data(sigma1=1, sigma2=1,seed=42):
 def load_finetuned_model():
     device_map = "auto"
     model = AutoModelForCausalLM.from_pretrained(
-        "/tmpdir/naim/llama3.1.8b/Llama-3.1-8B-Instruct",
+        "/tmpdir/user_name/llama3.1.8b/Llama-3.1-8B-Instruct",
         return_dict=True,       
         torch_dtype=torch.float16,
         device_map=device_map,  
     )
     print("BaseLine Model Loaded !!")
     print("-------------------------------------")
-    model = PeftModel.from_pretrained(model, "/tmpdir/naim/finetuning/model/results_3_epoch_dummy_LF_10_3/checkpoint-14400", device_map=device_map)
+    model = PeftModel.from_pretrained(model, "/tmpdir/user_name/finetuning/model/results_3_epoch_dummy_LF_10_3/checkpoint-14400", device_map=device_map)
     model = model.merge_and_unload()
-    tokenizer = AutoTokenizer.from_pretrained("/tmpdir/naim/llama3.1.8b/Llama-3.1-8B-Instruct", use_fast=True,trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained("/tmpdir/user_name/llama3.1.8b/Llama-3.1-8B-Instruct", use_fast=True,trust_remote_code=True)
     tokenizer.pad_token_id = 18610
     tokenizer.padding_side = "right"
     print("Fine tuned Model and tokenizer Loaded Locally !!")
@@ -115,7 +115,7 @@ def load_finetuned_model():
             key += 1
             #pbar.update(1)
     print("Dumping to Output file")
-    with open("/tmpdir/naim/finetuning/data/output/outputs_LFtest_Finally.json", "w") as f:
+    with open("/tmpdir/user_name/finetuning/data/output/outputs_LFtest_Finally.json", "w") as f:
         json.dump(outputs, f, indent=4)
 
     print("-------------------------------------")

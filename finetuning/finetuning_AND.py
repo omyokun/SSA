@@ -21,11 +21,11 @@ os.environ["WANDB_DISABLED"] = "True"
 # QLoRA parameters
 # LoRA attention dimension
 
-#input_data_path = "/tmpdir/naim/finetuning/data/omar_data_smallest_2.json"
-#input_data_path = "/tmpdir/naim/finetuning/linear_functions/input/train_LF.json"
-#input_data_csv = "/tmpdir/naim/finetuning/data/omar_data_smallest_41_rounded.csv"
-#input_data_csv = "/tmpdir/naim/finetuning/linear_functions/input/linear_functions_data_10_1-4.csv"
-input_data_csv = "/tmpdir/naim/finetuning/linear_functions/input/linear_functions_data_10_3.csv"
+#input_data_path = "/tmpdir/user_name/finetuning/data/linear_functions_data_smallest_2.json"
+#input_data_path = "/tmpdir/user_name/finetuning/linear_functions/input/train_LF.json"
+#input_data_csv = "/tmpdir/user_name/finetuning/data/linear_functions_data_smallest_41_rounded.csv"
+#input_data_csv = "/tmpdir/user_name/finetuning/linear_functions/input/linear_functions_data_10_1-4.csv"
+input_data_csv = "/tmpdir/user_name/finetuning/linear_functions/input/linear_functions_data_10_3.csv"
 
 lora_r = 64
 lora_alpha = 16
@@ -34,8 +34,8 @@ use_4bit = True
 bnb_4bit_compute_dtype = "float16"
 bnb_4bit_quant_type = "nf4"
 use_nested_quant = False
-output_dir = "/tmpdir/naim/finetuning/model/results_3_epoch_dummy_LF_10_3"
-#output_dir = "/tmpdir/naim/finetuning/model/results_3_epoch_dummy_AND"
+output_dir = "/tmpdir/user_name/finetuning/model/results_3_epoch_dummy_LF_10_3"
+#output_dir = "/tmpdir/user_name/finetuning/model/results_3_epoch_dummy_AND"
 num_train_epochs = 3
 fp16 = False
 bf16 = False
@@ -131,7 +131,7 @@ def convert_to_pandas(json_path):
 
 def main():
     #train_dataset,test_dataset,dev_dataset = return_datasets()
-    model_name = "/tmpdir/naim/llama3.1.8b/Llama-3.1-8B-Instruct"
+    model_name = "/tmpdir/user_name/llama3.1.8b/Llama-3.1-8B-Instruct"
     # Fine-tuned model name
     #new_model = "Llama-3-8B-SNLI"
     #new_model = "Llama-3-8B-AND-3-epoch"
@@ -181,7 +181,7 @@ def main():
     model.config.use_cache = False
     model.config.pretraining_tp = 1
     
-    tokenizer = AutoTokenizer.from_pretrained("/tmpdir/naim/llama3.1.8b/Llama-3.1-8B-Instruct",trust_remote_code=True ,truncation = True , add_eos_token = True)
+    tokenizer = AutoTokenizer.from_pretrained("/tmpdir/user_name/llama3.1.8b/Llama-3.1-8B-Instruct",trust_remote_code=True ,truncation = True , add_eos_token = True)
     pad_token_id = 18610  # This corresponds to `#_***`
     tokenizer.pad_token_id = pad_token_id
     tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training

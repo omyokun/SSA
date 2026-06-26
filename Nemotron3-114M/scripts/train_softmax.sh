@@ -52,7 +52,7 @@ srun apptainer exec \
         --rdzv_id=${SLURM_JOB_ID} \
         --rdzv_backend=c10d \
         --rdzv_endpoint="${MASTER_ADDR}:${MASTER_PORT}" \
-        /work/m24047/m24047brmn/nemo/OpenLLM-BPI-Training/training/train/test/train_sftmax.py \
+        /work/m24047/m24047brmn/nemo/OpenLLM-BPI-Training/training/train/test/train_softmax.py \
         --datamix "$DATAMIX" \
         --output_dir "$OUTPUT_DIR" \
         --name "$NAME" \

@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument(
         "--max-docs",
         type=int,
-        default=50_000,
+        default=None,
         help="Maximum documents to write. Use 0 or a negative value for no limit.",
     )
     parser.add_argument(

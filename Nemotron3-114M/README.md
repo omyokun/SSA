@@ -36,10 +36,10 @@ or copy the already-built files from the cluster.
 
 Download FineWeb-Edu text from Hugging Face:
 
+
 ```bash
 python3 data/download_fineweb_edu.py \
   --config sample-10BT \
-  --max-docs 50000 \
   --output data/fineweb_edu_text_document.txt
 ```
 

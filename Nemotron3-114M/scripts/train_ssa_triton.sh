@@ -35,6 +35,9 @@ if [[ "${SSA_KERNEL_VERSION}" != "v4" ]]; then
     exit 2
 fi
 
+# create tokenizer_name.txt
+printf "%s\n" "$(realpath tokenizer/luciole_50k)" > data/tokenizer_name.txt
+
 # Multi-node coordination
 export MASTER_PORT=$(echo "${SLURM_JOB_ID:-0} % 100000 % 50000 + 10001" | bc)
 export MASTER_ADDR=$(hostname --ip-address)

@@ -12,6 +12,12 @@ The Slurm scripts expect the NeMo container:
 nemo_25.04.03_arm.sif
 ```
 
+Download it with Apptainer:
+
+```bash
+apptainer pull nemo_25.04.03_arm.sif docker://nvcr.io/nvidia/nemo:25.04
+```
+
 That container provides Python 3.12, PyTorch, NeMo, Megatron-Core, Triton, and
 CUDA libraries. Extra local dependencies are listed in `requirements.txt`;
 `datasets` is for the Hugging Face downloader and `nemo-run` is installed from

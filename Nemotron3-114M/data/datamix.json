@@ -1,0 +1,11 @@
+{
+  "tokenizer": "tokenizer/luciole_50k",
+  "data_path": "data",
+  "total_tokens": 10000000000,
+  "train": [
+    {
+      "name": "fineweb_edu_text_document",
+      "weight": 1.0
+    }
+  ]
+}

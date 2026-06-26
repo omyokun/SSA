@@ -102,7 +102,7 @@ def get_baby_luciole_config():
 
 def load_model(
     checkpoint_path: str,
-    tokenizer_name: str = "/work/m24047/m24047brmn/tokenizers/luciole_50k",
+    tokenizer_name: str = "tokenizer/luciole_50k",
     device: str = "cuda",
     use_ssa: bool = True,
 ):
@@ -482,7 +482,7 @@ def get_parser():
     parser.add_argument(
         "--tokenizer",
         type=str,
-        default="/work/m24047/m24047brmn/tokenizers/luciole_50k",
+        default="tokenizer/luciole_50k",
         help="Tokenizer name or path",
     )
     parser.add_argument(

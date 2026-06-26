@@ -11,10 +11,14 @@
 mkdir -p slurm
 
 # Defaults
-DATAMIX=${DATAMIX:-"/tmpdir/m24047brmn/nemo_1b/data_fwe_50k/datamix_fineweb_edu_50k.json"}
-OUTPUT_DIR=${OUTPUT_DIR:-"/tmpdir/m24047brmn/nemo_1b/output"}
+REPO_DIR=${REPO_DIR:-"$PWD"}
+DATAMIX=${DATAMIX:-"data/datamix.json"}
+OUTPUT_DIR=${OUTPUT_DIR:-"outputs"}
 NAME=${NAME:-"baby_luciole_softmax"}
 SEED=${SEED:-1234}
+MAX_STEPS=${MAX_STEPS:-22000}
+GLOBAL_MAX_STEPS=${GLOBAL_MAX_STEPS:-${MAX_STEPS}}
+mkdir -p "$OUTPUT_DIR"
 
 # Multi-node coordination
 export MASTER_PORT=$(echo "${SLURM_JOB_ID:-0} % 100000 % 50000 + 10001" | bc)
@@ -45,6 +49,7 @@ srun apptainer exec \
     --env "SLURM_NNODES=${SLURM_NNODES}" \
     --env "NVTE_DEBUG=1" \
     --env "NVTE_DEBUG_LEVEL=2" \
+    --bind "${REPO_DIR}:${REPO_DIR}" \
     --bind /tmpdir,/work --nv /work/conteneurs/calmip/nemo_25.04.03_arm.sif \
     torchrun \
         --nnodes=${SLURM_NNODES} \
@@ -52,12 +57,12 @@ srun apptainer exec \
         --rdzv_id=${SLURM_JOB_ID} \
         --rdzv_backend=c10d \
         --rdzv_endpoint="${MASTER_ADDR}:${MASTER_PORT}" \
-        /work/m24047/m24047brmn/nemo/OpenLLM-BPI-Training/training/train/test/train_softmax.py \
+        "${REPO_DIR}/train/train_softmax.py" \
         --datamix "$DATAMIX" \
         --output_dir "$OUTPUT_DIR" \
         --name "$NAME" \
         --arch baby_luciole \
-        --max_steps 10500 \
+        --max_steps ${MAX_STEPS} \
         --seq_length 1024 \
         --batch_size 768 \
         --micro_batch_size 8 \
@@ -67,7 +72,7 @@ srun apptainer exec \
         --pipeline_parallelism 1 \
         --context_parallelism 1 \
         --duration "${SLURM_DURATION}" \
-        --global_max_steps 60000 \
+        --global_max_steps ${GLOBAL_MAX_STEPS} \
         --save_every_n_steps 5000 \
         --seed $SEED
 

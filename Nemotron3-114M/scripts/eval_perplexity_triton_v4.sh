@@ -10,15 +10,16 @@
 
 mkdir -p slurm
 
-CHECKPOINT_PATH=${CHECKPOINT:-"/tmpdir/m24047brmn/nemo_1b/output/baby_luciole-ssa-triton-v4/checkpoints/baby_luciole-ssa-triton-v4-step=0029999-last"}
+REPO_DIR=${REPO_DIR:-"$PWD"}
+CHECKPOINT_PATH=${CHECKPOINT:-"outputs/baby_luciole-ssa-triton-v4/checkpoints/baby_luciole-ssa-triton-v4-step=0022000-last"}
 
-FW_DATA_PATH=${FW_DATA_PATH:-"/tmpdir/m24047brmn/nemo_1b/data_fwe_50k/fineweb_edu_text_document"}
-WIKI_DATA_PATH=${WIKI_DATA_PATH:-"/tmpdir/m24047brmn/nemo_1b/data_wiki/wikipedia_en_text_document"}
+FW_DATA_PATH=${FW_DATA_PATH:-"data/fineweb_edu_text_document"}
+WIKI_DATA_PATH=${WIKI_DATA_PATH:-"data/wikipedia_en_text_document"}
 
 FW_DATAMIX=${FW_DATAMIX:-""}
 WIKI_DATAMIX=${WIKI_DATAMIX:-""}
 
-TOKENIZER_PATH=${TOKENIZER:-"/work/m24047/m24047brmn/tokenizers/luciole_50k"}
+TOKENIZER_PATH=${TOKENIZER:-"tokenizer/luciole_50k"}
 NUM_SAMPLES=${NUM_SAMPLES:-1000}
 SEQ_LENGTH=${SEQ_LENGTH:-1024}
 BATCH_SIZE=${BATCH_SIZE:-8}
@@ -27,7 +28,8 @@ SEED=${SEED:-42}
 COMPILED_BDA=${COMPILED_BDA:-0}
 FORCE_CONTIGUOUS_QKV=${FORCE_CONTIGUOUS_QKV:-1}
 
-OUTPUT_FILE=${OUTPUT:-"/tmpdir/m24047brmn/nemo_1b/output/perplexity_triton_v4_fw_wiki_${SLURM_JOB_ID}.json"}
+OUTPUT_FILE=${OUTPUT:-"outputs/eval/perplexity_triton_v4_fw_wiki_${SLURM_JOB_ID}.json"}
+mkdir -p "$(dirname "$OUTPUT_FILE")"
 
 echo "=========================================="
 echo "Evaluating Perplexity: Baby Luciole SSA Triton v4"
@@ -63,8 +65,9 @@ fi
 
 apptainer exec \
     --env "PYTHONUSERBASE=${MYENVS}/nemo" \
+    --bind "${REPO_DIR}:${REPO_DIR}" \
     --bind /tmpdir,/work --nv /work/conteneurs/calmip/nemo_25.04.03_arm.sif \
-    python3 /work/m24047/m24047brmn/nemo/OpenLLM-BPI-Training/training/train/test/eval_perplexity_triton_v4.py \
+    python3 "${REPO_DIR}/train/eval_perplexity_triton_v4.py" \
         --checkpoint "$CHECKPOINT_PATH" \
         --tokenizer "$TOKENIZER_PATH" \
         --fw-data-path "$FW_DATA_PATH" \

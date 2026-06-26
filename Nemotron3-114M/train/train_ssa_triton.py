@@ -52,20 +52,20 @@ def find_latest_checkpoint_step(checkpoint_dir: str) -> int:
 
 def parse_args():
     parser = argparse.ArgumentParser(description="SSA Triton-fused training harness")
-    parser.add_argument("--datamix", default="/tmpdir/m24047brmn/nemo_1b/data/nemo1b_mock_datamix.json", type=str)
-    parser.add_argument("--arch", default="nemotron1b", type=str)
-    parser.add_argument("--name", default="nemotron1b-ssa-triton-test", type=str)
+    parser.add_argument("--datamix", default="data/datamix.json", type=str)
+    parser.add_argument("--arch", default="baby_luciole", type=str)
+    parser.add_argument("--name", default="baby_luciole-ssa-triton-v4", type=str)
     parser.add_argument("--mode", default="debug", choices=["debug", "benchmark", "phase1", "phase2", "annealing"], type=str)
-    parser.add_argument("--output_dir", default="/tmpdir/m24047brmn/nemo_1b/output", type=str)
-    parser.add_argument("--batch_size", "--gbs", default=128, type=int)
-    parser.add_argument("--micro_batch_size", "--mbs", default=1, type=int)
+    parser.add_argument("--output_dir", default="outputs", type=str)
+    parser.add_argument("--batch_size", "--gbs", default=768, type=int)
+    parser.add_argument("--micro_batch_size", "--mbs", default=8, type=int)
     parser.add_argument("--seq_length", default=1024, type=int)
     parser.add_argument("--tensor_parallelism", "--tp", default=1, type=int)
     parser.add_argument("--pipeline_parallelism", "--pp", default=1, type=int)
     parser.add_argument("--context_parallelism", "--cp", default=1, type=int)
     parser.add_argument(
         "--max_steps",
-        default=5000,
+        default=22000,
         type=int,
         help="Absolute training horizon (target global step for this run series).",
     )
@@ -76,7 +76,7 @@ def parse_args():
     parser.add_argument("--fp8", action="store_true", default=False)
     parser.add_argument("--performance_mode", action="store_true", default=False)
     parser.add_argument("--duration", default="00:24:00:00", type=str, help="Walltime DD:HH:MM:SS")
-    parser.add_argument("--save_every_n_steps", default=500, type=int)
+    parser.add_argument("--save_every_n_steps", default=6000, type=int)
     parser.add_argument(
         "--global_max_steps",
         default=None,
@@ -85,7 +85,7 @@ def parse_args():
     )
     parser.add_argument(
         "--this_run_max_steps",
-        default=None,
+        default=22000,
         type=int,
         help="Optional per-job step budget; stop after this many optimizer steps in this run.",
     )
@@ -134,7 +134,7 @@ def main():
         logger.warning("Ignoring --learnable_b; b is fixed by policy.")
     if args.ssa_n != 1.5 or args.ssa_b != 0.8:
         logger.warning(
-            "Overriding SSA init from (n=%s, b=%s) to fixed policy (n=1.5, b=0.8).",
+            "Overriding SSA init from (n=%s, b=%s) to required policy (n=1.5 trainable, b=0.8 fixed).",
             args.ssa_n,
             args.ssa_b,
         )

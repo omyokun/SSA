@@ -23,9 +23,9 @@ if str(ROOT) not in sys.path:
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DEFAULT_TOKENIZER = "/work/m24047/m24047brmn/tokenizers/luciole_50k"
-DEFAULT_FW_DATA_PATH = "/tmpdir/m24047brmn/nemo_1b/data_fwe_50k/fineweb_edu_text_document"
-DEFAULT_WIKI_DATA_PATH = "/tmpdir/m24047brmn/nemo_1b/data_wiki/wikipedia_en_text_document"
+DEFAULT_TOKENIZER = "tokenizer/luciole_50k"
+DEFAULT_FW_DATA_PATH = "data/fineweb_edu_text_document"
+DEFAULT_WIKI_DATA_PATH = "data/wikipedia_en_text_document"
 
 
 def init_single_gpu_parallel_state(seed: int = 1234, device: str = "cuda"):

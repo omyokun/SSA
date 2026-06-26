@@ -10,13 +10,14 @@
 
 mkdir -p slurm
 
-SSA_CHECKPOINT=${SSA_CHECKPOINT:-"/tmpdir/m24047brmn/nemo_1b/output/baby_luciole-ssa-triton-v4/checkpoints/baby_luciole-ssa-triton-v4-step=0023999"}
-SOFTMAX_CHECKPOINT=${SOFTMAX_CHECKPOINT:-"/tmpdir/m24047brmn/nemo_1b/output/baby_luciole-softmax-test/checkpoints/baby_luciole-softmax-test-step=0020998-last"}
+REPO_DIR=${REPO_DIR:-"$PWD"}
+SSA_CHECKPOINT=${SSA_CHECKPOINT:-"outputs/baby_luciole-ssa-triton-v4/checkpoints/baby_luciole-ssa-triton-v4-step=0022000-last"}
+SOFTMAX_CHECKPOINT=${SOFTMAX_CHECKPOINT:-"outputs/baby_luciole_softmax/checkpoints/baby_luciole_softmax-step=0022000-last"}
 
 SSA_MODEL_NAME=${SSA_MODEL_NAME:-"baby_luciole_ssa_triton_v4"}
 SOFTMAX_MODEL_NAME=${SOFTMAX_MODEL_NAME:-"baby_luciole_softmax"}
 MODEL_SELECTION=${MODEL_SELECTION:-"both"} # both|ssa|softmax
-TOKENIZER_PATH=${TOKENIZER:-"/work/m24047/m24047brmn/tokenizers/luciole_50k"}
+TOKENIZER_PATH=${TOKENIZER:-"tokenizer/luciole_50k"}
 TASKS=${TASKS:-"all"}
 BATCH_SIZE=${BATCH_SIZE:-16}
 MAX_LENGTH=${MAX_LENGTH:-2048}
@@ -27,6 +28,7 @@ NUM_FEWSHOT=${NUM_FEWSHOT:-5}
 COMPILED_BDA=${COMPILED_BDA:-0}
 FORCE_CONTIGUOUS_QKV=${FORCE_CONTIGUOUS_QKV:-1}
 HF_DATASETS_OFFLINE=${HF_DATASETS_OFFLINE:-1}
+HF_HOME=${HF_HOME:-"hf_cache"}
 OUTPUT_DIR=${OUTPUT_DIR:-"benchmark_results"}
 
 mkdir -p "$OUTPUT_DIR"
@@ -87,13 +89,14 @@ run_single_model() {
     echo "-------------------------------------------"
 
     apptainer exec \
-        --env "HF_HOME=/work/m24047/m24047brmn/lm_eval" \
+        --env "HF_HOME=${HF_HOME}" \
         --env "HF_DATASETS_OFFLINE=${HF_DATASETS_OFFLINE}" \
+        --bind "${REPO_DIR}:${REPO_DIR}" \
         --bind /tmpdir,/work \
         --nv /work/conteneurs/calmip/nemo_25.04.03_arm.sif \
-        bash -lc "cd /work/m24047/m24047brmn/nemo/OpenLLM-BPI-Training/training/train/test && \
+        bash -lc "cd '${REPO_DIR}' && \
             export PYTHONPATH=/usr/lib/python3.12:/usr/local/lib/python3.12/dist-packages:/usr/local/lib/python3.12/dist-packages/lightning_utilities-0.14.0-py3.12.egg:/opt/venv/lib/python3.12/site-packages:/opt/nemo:/opt/NeMo:/opt/NeMo/examples:/opt/megatron-lm:${MYENVS}/nemo/lib/python3.12/site-packages:\${PYTHONPATH} && \
-            python3 run_benchmarks_triton_v4.py \
+            python3 train/run_benchmarks_triton_v4.py \
                 --checkpoint '$checkpoint' \
                 --model-type '$model_type' \
                 --model-name '$model_name' \

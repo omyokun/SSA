@@ -20,7 +20,7 @@ from eval_perplexity_triton_v4 import (
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DEFAULT_TOKENIZER = "/work/m24047/m24047brmn/tokenizers/luciole_50k"
+DEFAULT_TOKENIZER = "tokenizer/luciole_50k"
 MODEL_TYPE_SSA_TRITON_V4 = "ssa_triton_v4"
 MODEL_TYPE_SSA = "ssa"
 MODEL_TYPE_SOFTMAX = "softmax"
@@ -28,12 +28,12 @@ MODEL_TYPES = (MODEL_TYPE_SSA_TRITON_V4, MODEL_TYPE_SSA, MODEL_TYPE_SOFTMAX)
 GSM8K_BENCHMARK_KEY = "gsm8k"
 
 DEFAULT_SSA_TRITON_V4_CHECKPOINT = (
-    "/tmpdir/m24047brmn/nemo_1b/output/baby_luciole-ssa-triton-v4/checkpoints/"
-    "baby_luciole-ssa-triton-v4-step=0023999"
+    "outputs/baby_luciole-ssa-triton-v4/checkpoints/"
+    "baby_luciole-ssa-triton-v4-step=0022000-last"
 )
 DEFAULT_SOFTMAX_CHECKPOINT = (
-    "/tmpdir/m24047brmn/nemo_1b/output/baby_luciole-softmax-test/checkpoints/"
-    "baby_luciole-softmax-test-step=0020998-last"
+    "outputs/baby_luciole_softmax/checkpoints/"
+    "baby_luciole_softmax-step=0022000-last"
 )
 
 

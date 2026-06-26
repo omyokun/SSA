@@ -12,17 +12,16 @@
 mkdir -p slurm
 
 # Checkpoint path - use latest checkpoint from SSA training
-# CHECKPOINT_PATH=${CHECKPOINT:-"/tmpdir/m24047brmn/nemo_1b/output/baby_luciole-ssa-test/checkpoints/baby_luciole-ssa-test-step=0020498-last"}
-CHECKPOINT_PATH=${CHECKPOINT:-"/tmpdir/m24047brmn/nemo_1b/output/baby_luciole-softmax-test/checkpoints/baby_luciole-softmax-test-step=0020998-last"}
+REPO_DIR=${REPO_DIR:-"$PWD"}
+CHECKPOINT_PATH=${CHECKPOINT:-"outputs/baby_luciole_softmax/checkpoints/baby_luciole_softmax-step=0022000-last"}
 
 
 # Data path - preprocessed FineWeb data
-# DATA_PATH=${DATA_PATH:-"/tmpdir/m24047brmn/nemo_1b/data_fwe_50k/fineweb_edu_text_document"}
-DATA_PATH=${DATA_PATH:-"/tmpdir/m24047brmn/nemo_1b/data_wiki/wikipedia_en_text_document"}
+DATA_PATH=${DATA_PATH:-"data/wikipedia_en_text_document"}
 
 
 # Tokenizer
-TOKENIZER_PATH=${TOKENIZER:-"/work/m24047/m24047brmn/tokenizers/luciole_50k"}
+TOKENIZER_PATH=${TOKENIZER:-"tokenizer/luciole_50k"}
 
 # Evaluation parameters
 NUM_SAMPLES=${NUM_SAMPLES:-1000}
@@ -31,7 +30,8 @@ BATCH_SIZE=${BATCH_SIZE:-8}
 SEED=${SEED:-42}
 
 # Output file for results
-OUTPUT_FILE=${OUTPUT:-"/tmpdir/m24047brmn/nemo_1b/output/perplexity_results_${SLURM_JOB_ID}.json"}
+OUTPUT_FILE=${OUTPUT:-"outputs/eval/perplexity_softmax_${SLURM_JOB_ID}.json"}
+mkdir -p "$(dirname "$OUTPUT_FILE")"
 
 echo "=========================================="
 echo "Evaluating Perplexity: Baby Luciole SSA"
@@ -47,8 +47,9 @@ echo "=========================================="
 # Run evaluation with apptainer
 apptainer exec \
     --env "PYTHONUSERBASE=${MYENVS}/nemo" \
+    --bind "${REPO_DIR}:${REPO_DIR}" \
     --bind /tmpdir,/work --nv /work/conteneurs/calmip/nemo_25.04.03_arm.sif \
-    python3 /work/m24047/m24047brmn/nemo/OpenLLM-BPI-Training/training/train/test/eval_perplexity.py \
+    python3 "${REPO_DIR}/train/eval_perplexity.py" \
         --checkpoint "$CHECKPOINT_PATH" \
         --tokenizer "$TOKENIZER_PATH" \
         --data_path "$DATA_PATH" \

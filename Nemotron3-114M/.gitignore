@@ -1,0 +1,13 @@
+benchmark_results/
+hf_cache/
+outputs/
+slurm/
+
+__pycache__/
+*.pyc
+
+data/*.bin
+data/*.idx
+data/*.jsonl
+data/*.txt
+data/*_indexmap_*

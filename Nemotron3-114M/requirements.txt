@@ -1,0 +1,4 @@
+# The NeMo/PyTorch/Megatron/Triton stack is expected to come from the NeMo
+# container used by the Slurm scripts.
+datasets
+git+https://github.com/NVIDIA/NeMo-Run.git

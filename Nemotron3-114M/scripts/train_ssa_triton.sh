@@ -11,13 +11,15 @@
 mkdir -p slurm
 
 # Defaults
-DATAMIX=${DATAMIX:-"/tmpdir/m24047brmn/nemo_1b/data_fwe_50k/datamix_fineweb_edu_50k.json"}
-OUTPUT_DIR=${OUTPUT_DIR:-"/tmpdir/m24047brmn/nemo_1b/output"}
+REPO_DIR=${REPO_DIR:-"$PWD"}
+DATAMIX=${DATAMIX:-"data/datamix.json"}
+OUTPUT_DIR=${OUTPUT_DIR:-"outputs"}
 NAME=${NAME:-"baby_luciole-ssa-triton-v4"}
 SEED=${SEED:-1234}
+mkdir -p "$OUTPUT_DIR"
 
 # SSA hyperparameter
-SSA_N=1.5   # fixed
+SSA_N=1.5   # trainable initial value
 SSA_B=0.8   # fixed
 SSA_KERNEL_VERSION=${SSA_KERNEL_VERSION:-v4}  # pinned to tutorial-based v4 kernel
 SSA_TRITON_COMPILE_BDA=${SSA_TRITON_COMPILE_BDA:-1}
@@ -25,9 +27,8 @@ LR_WARMUP_STEPS=${LR_WARMUP_STEPS:-500}
 SKIP_TRITON_WARMUP=${SKIP_TRITON_WARMUP:-0}
 DISABLE_COMPILED_BDA=${DISABLE_COMPILED_BDA:-0}
 FORCE_CONTIGUOUS_QKV=${FORCE_CONTIGUOUS_QKV:-1}
-GLOBAL_MAX_STEPS=${GLOBAL_MAX_STEPS:-60000}
-# Backward-compatible alias: if THIS_RUN_MAX_STEPS is unset, use legacy MAX_STEPS when provided.
-THIS_RUN_MAX_STEPS=${THIS_RUN_MAX_STEPS:-30000}
+GLOBAL_MAX_STEPS=${GLOBAL_MAX_STEPS:-22000}
+THIS_RUN_MAX_STEPS=${THIS_RUN_MAX_STEPS:-${GLOBAL_MAX_STEPS}}
 
 if [[ "${SSA_KERNEL_VERSION}" != "v4" ]]; then
     echo "ERROR: SSA_KERNEL_VERSION must be 'v4' (got '${SSA_KERNEL_VERSION}')."
@@ -80,7 +81,7 @@ fi
 
 # Pre-compile Triton kernels (warmup) — avoids JIT overhead at step 0
 # Triton caches compiled kernels in ~/.triton/cache, so this only helps first run
-export TRITON_CACHE_DIR="/tmpdir/m24047brmn/triton_cache"
+export TRITON_CACHE_DIR="${TRITON_CACHE_DIR:-${OUTPUT_DIR}/triton_cache}"
 mkdir -p "$TRITON_CACHE_DIR"
 
 srun apptainer exec \
@@ -93,6 +94,7 @@ srun apptainer exec \
     --env "TRITON_CACHE_DIR=${TRITON_CACHE_DIR}" \
     --env "SSA_KERNEL_VERSION=${SSA_KERNEL_VERSION}" \
     --env "SSA_TRITON_COMPILE_BDA=${SSA_TRITON_COMPILE_BDA}" \
+    --bind "${REPO_DIR}:${REPO_DIR}" \
     --bind /tmpdir,/work --nv /work/conteneurs/calmip/nemo_25.04.03_arm.sif \
     torchrun \
         --nnodes=${SLURM_NNODES} \
@@ -100,7 +102,7 @@ srun apptainer exec \
         --rdzv_id=${SLURM_JOB_ID} \
         --rdzv_backend=c10d \
         --rdzv_endpoint="${MASTER_ADDR}:${MASTER_PORT}" \
-        /work/m24047/m24047brmn/nemo/OpenLLM-BPI-Training/training/train/test/train_ssa_triton.py \
+        "${REPO_DIR}/train/train_ssa_triton.py" \
         --datamix "$DATAMIX" \
         --output_dir "$OUTPUT_DIR" \
         --name "$NAME" \
